@@ -1,5 +1,3 @@
-import sys
-
 s_box = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
@@ -18,7 +16,6 @@ s_box = (
     0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16,
 )
-print(len(s_box))
 
 inv_s_box = (
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
@@ -105,17 +102,13 @@ def matrix2bytes(matrix):
 def xor_bytes(a, b):
     return bytes(i^j for i, j in zip(a, b))
 
-def pad(plaintext):
-    padding_len = 16 - (len(plaintext) % 16)
-    padding = bytes([padding_len] * padding_len)
-    return plaintext + padding
+def pad(data, block_size=16):
+    pad_length = block_size - (len(data) % block_size)
+    return data + bytes([pad_length] * pad_length)
 
-def unpad(plaintext):
-    padding_len = plaintext[-1]
-    assert padding_len > 0
-    message, padding = plaintext[:-padding_len], plaintext[-padding_len:]
-    assert all(p == padding_len for p in padding)
-    return message
+def unpad(data):
+    pad_length = data[-1]
+    return data[:-pad_length]
 
 def split_blocks(message, block_size=16):
     return [message[i:i+16] for i in range(0, len(message), 16)]
@@ -194,14 +187,3 @@ def decrypt_ecb(ciphertext, key):
     
     return unpad(plaintext)
 
-if __name__ == "__main__":
-    key = b'Sixteen byte key'
-    plaintext = b'This is a secret message that needs to be encrypted!'
-    
-    print("Original:", plaintext)
-    
-    ciphertext = encrypt_ecb(plaintext, key)
-    print("Encrypted:", ciphertext.hex())
-    
-    decrypted = decrypt_ecb(ciphertext, key)
-    print("Decrypted:", decrypted.decode())
