@@ -102,13 +102,18 @@ def matrix2bytes(matrix):
 def xor_bytes(a, b):
     return bytes(i^j for i, j in zip(a, b))
 
-def pad(data, block_size=16):
-    pad_length = block_size - (len(data) % block_size)
-    return data + bytes([pad_length] * pad_length)
+def pad(plaintext):
+    padding_len = 16 - (len(plaintext) % 16)
+    padding = bytes([padding_len] * padding_len)
+    return plaintext + padding
 
-def unpad(data):
-    pad_length = data[-1]
-    return data[:-pad_length]
+def unpad(plaintext):
+    padding_len = plaintext[-1]
+    assert padding_len > 0
+    message, padding = plaintext[:-padding_len], plaintext[-padding_len:]
+    assert all(p == padding_len for p in padding)
+    return message
+
 
 def split_blocks(message, block_size=16):
     return [message[i:i+16] for i in range(0, len(message), 16)]
