@@ -46,7 +46,10 @@ class Client:
         with open(file_path, 'rb') as f:
             data = f.read()
             encrypted = encrypt_ecb(data, self.aes_key)
-            self.conn.sendall(encrypted)
+            # self.conn.sendall(encrypted)
+            for i in range(0, len(encrypted), self.chunk_size):
+                chunk = encrypted[i:i+self.chunk_size]
+                self.conn.send(chunk)
 
     def receive_file(self, save_path: str):
         if not self.conn or not self.aes_key:
