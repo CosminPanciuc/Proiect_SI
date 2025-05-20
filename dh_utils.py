@@ -7,11 +7,26 @@ g = 2
 def generate_private_key():
     return random.randint(2, p - 2)
 
+def modular_pow(base, exponent, modulus):
+    result = 1
+    base = base % modulus  
+
+    while exponent > 0:
+        if exponent % 2 == 1:
+            result = (result * base) % modulus
+        exponent = exponent // 2
+        base = (base * base) % modulus
+
+    return result
+
+
 def generate_public_key(private_key):
-    return pow(g, private_key, p)
+    return modular_pow(g, private_key, p)
 
 def compute_shared_secret(peer_public_key, private_key):
-    return pow(peer_public_key, private_key, p)
+    return modular_pow(peer_public_key, private_key, p)
 
 def derive_aes_key(shared_secret):
     return hashlib.sha256(str(shared_secret).encode()).digest()[:16]
+
+print(modular_pow(289, 11, 1363))
